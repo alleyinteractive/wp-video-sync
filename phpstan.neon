@@ -6,15 +6,5 @@ parameters:
 	level: max
 
 	paths:
-		- blocks/
-		- entries/
 		- src/
-		- plugin.php
-
-#    ignoreErrors:
-#        - '#PHPDoc tag @var#'
-#
-#    excludePaths:
-#        - ./*/*/FileToBeExcluded.php
-#
-#    checkMissingIterableValueType: false
+		- wp-video-sync.php

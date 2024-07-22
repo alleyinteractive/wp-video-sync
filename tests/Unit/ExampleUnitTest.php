@@ -1,11 +1,11 @@
 <?php
 /**
- * Create WordPress Plugin Tests: Example Unit Test
+ * WP Video Sync Tests: Example Unit Test
  *
- * @package create-wordpress-plugin
+ * @package wp-video-sync
  */
 
-namespace Create_WordPress_Plugin\Tests\Unit;
+namespace Alley\WP\WP_Video_Sync\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 

@@ -1,0 +1,29 @@
+name: "All Pull Request Tests"
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  pr-tests:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}-${{ matrix.php-version }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run General Tests
+        uses: alleyinteractive/action-test-general@develop
+      - name: Run PHP Tests
+        uses: alleyinteractive/action-test-php@develop
+        with:
+          php-version: ${{ matrix.php-version }}
+          wordpress-host: 'false'
+          wordpress-version: 'false'
