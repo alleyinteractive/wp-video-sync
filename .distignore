@@ -20,3 +20,23 @@ Thumbs.db
 *.code-workspace
 .idea
 .vscode
+
+# CI
+.github
+Dockerfile
+DOCKER_ENV
+
+# Tests
+tests
+
+# Config
+.distignore
+.editorconfig
+.gitattributes
+.gitignore
+.phpcs.xml
+phpstan.neon
+phpunit.xml
+
+# Lockfiles
+composer.lock

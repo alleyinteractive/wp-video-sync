@@ -7,11 +7,8 @@
 #
 /.github export-ignore
 /.phpcs.xml export-ignore
-/.phpcs export-ignore
 /phpunit.xml export-ignore
 /tests export-ignore
-/configure.php export-ignore
-/Makefile export-ignore
 
 #
 # Auto detect text files and perform LF normalization.

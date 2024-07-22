@@ -1,16 +1,16 @@
 <?php
 /**
- * Create WordPress Plugin Tests: Base Test Class
+ * WP Video Sync Tests: Base Test Class
  *
- * @package create-wordpress-plugin
+ * @package wp-video-sync
  */
 
-namespace Create_WordPress_Plugin\Tests;
+namespace Alley\WP\WP_Video_Sync\Tests;
 
 use Mantle\Testkit\Test_Case as TestkitTest_Case;
 
 /**
- * Create WordPress Plugin Base Test Case
+ * WP Video Sync Base Test Case
  */
 abstract class TestCase extends TestkitTest_Case {
 

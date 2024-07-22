@@ -1,13 +1,13 @@
 <?php
 /**
- * Create WordPress Plugin Tests: Example Feature Test
+ * WP Video Sync Tests: Example Feature Test
  *
- * @package create-wordpress-plugin
+ * @package wp-video-sync
  */
 
-namespace Create_WordPress_Plugin\Tests\Feature;
+namespace Alley\WP\WP_Video_Sync\Tests\Feature;
 
-use Create_WordPress_Plugin\Tests\TestCase;
+use Alley\WP\WP_Video_Sync\Tests\TestCase;
 
 /**
  * A test suite for an example feature.
