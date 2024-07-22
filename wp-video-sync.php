@@ -21,4 +21,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/src/class-wp-video-sync.php';
+require_once __DIR__ . '/src/autoload.php';
