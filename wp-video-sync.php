@@ -6,7 +6,7 @@
  * Version: 0.1.0
  * Author: Alley
  * Author URI: https://github.com/alleyinteractive/wp-video-sync
- * Requires at least: 6.6
+ * Requires at least: 6.0
  * Tested up to: 6.6
  *
  * Text Domain: wp-video-sync
