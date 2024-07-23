@@ -4,24 +4,27 @@ Contributors: alleyinteractive
 
 Tags: alleyinteractive, wp-video-sync
 
-Stable tag: 0.0.0
+Stable tag: 0.1.0
 
-Requires at least: 5.9
+Requires at least: 6.0
 
-Tested up to: 6.1
+Tested up to: 6.6
 
-Requires PHP: 8.1
+Requires PHP: 8.2
 
 License: GPL v2 or later
 
-[![Coding Standards](https://github.com/alleyinteractive/wp-video-sync/actions/workflows/coding-standards.yml/badge.svg)](https://github.com/alleyinteractive/wp-video-sync/actions/workflows/coding-standards.yml)
-[![Testing Suite](https://github.com/alleyinteractive/wp-video-sync/actions/workflows/unit-test.yml/badge.svg)](https://github.com/alleyinteractive/wp-video-sync/actions/workflows/unit-test.yml)
+[![Testing Suite](https://github.com/alleyinteractive/wp-video-sync/actions/workflows/all-pr-tests.yml/badge.svg)](https://github.com/alleyinteractive/wp-video-sync/actions/workflows/all-pr-tests.yml)
 
 Sync videos from a hosting provider to WordPress.
 
+Runs a scheduled task to sync videos from a supported video hosting provider to WordPress in batches based on the last modified date of the video. Implementers are responsible for installing and configuring a compatible plugin, choosing it as an adapter, and defining the callback that will be run for each video, which will be responsible for performing any post creations or updates in WordPress.
+
+This plugin is a great way to sync videos uploaded to a hosting provider (such as JW Player) to WordPress, such that the video itself remains on the hosting provider, but the video can be displayed in WordPress using a player block or shortcode, appears at its own unique URL, and can be included in search results.
+
 ## Installation
 
-You can install the package via composer:
+You can install the package via Composer:
 
 ```bash
 composer require alleyinteractive/wp-video-sync
@@ -32,90 +35,72 @@ composer require alleyinteractive/wp-video-sync
 Activate the plugin in WordPress and use it like so:
 
 ```php
-$plugin = Alley\WP\WP_Video_Sync\WP_Video_Sync\WP_Video_Sync();
-$plugin->perform_magic();
-```
-<!--front-end-->
-## Testing
+use Alley\WP\WP_Video_Sync\Adapters\JW_Player_7_For_WP;
+use Alley\WP\WP_Video_Sync\Sync_Manager;
+use DateInterval;
+use DateTimeImmutable;
+use WP_Query;
 
-Run `npm run test` to run Jest tests against JavaScript files. Run
-`npm run test:watch` to keep the test runner open and watching for changes.
-
-Run `npm run lint` to run ESLint against all JavaScript files. Linting will also
-happen when running development or production builds.
-
-Run `composer test` to run tests against PHPUnit and the PHP code in the plugin.
-
-### The `entries` directory and entry points
-
-All directories created in the `entries` directory can serve as entry points and will be compiled with [@wordpress/scripts](https://github.com/WordPress/gutenberg/blob/trunk/packages/scripts/README.md#scripts) into the `build` directory with an accompanied `index.asset.php` asset map.
-
-#### Scaffolding an entry point
-
-To generate a new entry point, run the following command:
-
-```sh
-npm run create-entry
-```
-
-To generate a new slotfill, run the following command:
-
-```sh
-npm run create-slotfill
-```
-
-The command will prompt the user through several options for creating an entry or slotfill. The entries are scaffolded with the `@alleyinteractive/create-entry` script. Run the help command to see all the options:
-
-```sh
-npx @alleyinteractive/create-entry --help
-```
-[Visit the package README](https://www.npmjs.com/package/@alleyinteractive/create-entry) for more information.
-
-#### Enqueuing Entry Points
-
-You can also include an `index.php` file in the entry point directory for enqueueing or registering a script. This file will then be moved to the build directory and will be auto-loaded with the `load_scripts()` function in the `functions.php` file. Alternatively, if a script is to be enqueued elsewhere there are helper functions in the `src/assets.php` file for getting the assets.
-
-### Scaffold a dynamic block with `create-block`
-
-Use the `create-block` command to create custom blocks with [@alleyinteractive/create-block](https://github.com/alleyinteractive/alley-scripts/tree/main/packages/create-block) script and follow the prompts to generate all the block assets in the `blocks/` directory.
-Block registration, script creation, etc will be scaffolded from the `create-block` script. Run `npm run build` to compile and build the custom block. Blocks are enqueued using the `load_scripts()` function in `src/assets.php`.
-
-### Updating WP Dependencies
-
-Update the [WordPress dependency packages](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-scripts/#packages-update) used in the project to their latest version.
-
-To update `@wordpress` dependencies to their latest version use the packages-update command:
-
-```sh
-npx wp-scripts packages-update
+add_action( 'plugins_loaded', function () => {
+	$sync_manager = Sync_Manager::init()
+		->with_adapter( new JW_Player_7_For_WP() )
+		->with_frequency( 'hourly' )
+		->with_batch_size( 1000 )
+		->with_callback(
+			function ( $video ) {
+				$existing_video = new WP_Query( [ 'meta_key' => '_jwppp-video-url-1', 'meta_value' => $video->id ] );
+				$existing_id    = $existing_video->posts[0]->ID ?? 0;
+				$duration       = '';
+				try {
+					if ( ! empty( $video->metadata->duration ) ) {
+						$duration = ( new DateTimeImmutable() )
+							->add( new DateInterval( sprintf( 'PT%dS', (int) $video->metadata->duration ) ) )
+							->diff( new DateTimeImmutable() )->format( 'H:i:s' );
+					}
+				} catch ( Exception $e ) {
+					$duration = '';
+				}
+				wp_insert_post(
+					[
+						'ID'            => $existing_id,
+						'post_type'     => 'post',
+						'post_status'   => 'publish',
+						'post_title'    => $video->metadata->title,
+						'post_content'  => $video->metadata->description ?? '',
+						'post_date'     => DateTimeImmutable::createFromFormat( DATE_W3C, $video->created )->format( 'Y-m-d H:i:s' ),
+						'post_modified' => DateTimeImmutable::createFromFormat( DATE_W3C, $video->last_modified )->format( 'Y-m-d H:i:s' ),
+						'meta_input'    => [
+							'_jwppp-video-url-1'           => $video->id,
+							'_jwppp-cloud-playlist-1'      => 'no',
+							'_jwppp-sources-number-1'      => 1,
+							'_jwppp-video-title-1'         => $video->metadata->title,
+							'_jwppp-video-description-1'   => $video->metadata->description ?? '',
+							'_jwppp-activate-media-type-1' => 0,
+							'_jwppp-playlist-carousel-1'   => 0,
+							'_jwppp-video-duration-1'      => $duration,
+							'_jwppp-video-tags-1'          => $video->metadata->tags ?? '',
+						],
+					]
+				);
+			}
+		);
+} );
 ```
 
-This script provides the following custom options:
+This will configure the plugin to import a batch of 1000 videos every hour from JW Player, sorted by least to most recently updated, starting with the date and time of the last video that was updated. If videos have already been imported (as identified by the postmeta value saved for the unique video ID) they will be updated rather than created. New videos will be created. The example code above uses the `post` post type for this purpose, but the code could easily be adapted to use a custom post type. Additionally, the post content could be set to include a Gutenberg block or a shortcode for a player.
 
--   `--dist-tag` – allows specifying a custom dist-tag when updating npm packages. Defaults to `latest`. This is especially useful when using [`@wordpress/dependency-extraction-webpack-plugin`](https://www.npmjs.com/package/@wordpress/dependency-extraction-webpack-plugin). It lets installing the npm dependencies at versions used by the given WordPress major version for local testing, etc. Example:
+### Supported Adapters
 
-```sh
-npx wp-scripts packages-update --dist-tag=wp-WPVERSION`
-```
+As of now, the plugin only supports JW Player 7 for WordPress (both the free and premium versions). Other adapters may be added in the future.
 
-Where `WPVERSION` is the version of WordPress you are targeting. The version
-must include both the major and minor version (e.g., `6.1`). For example:
+#### JW Player 7 for WordPress
 
-```sh
-npx wp-scripts packages-update --dist-tag=wp-6.1`
-```
+- Requires the [JW Player 7 for WordPress](https://wordpress.org/plugins/jw-player-7-for-wp/) plugin to be installed, activated, and properly configured with access credentials. Also supports the premium version.
+- The video object in the callback is a `stdClass` with the properties described in the `media` object under response code `200` in [the JW Player API documentation for the media list endpoint](https://docs.jwplayer.com/platform/reference/get_v2-sites-site-id-media).
 
 ## Releasing the Plugin
 
-The plugin uses a [built release workflow](./.github/workflows/built-release.yml)
-to compile and tag releases. Whenever a new version is detected in the root
-`composer.json` file or in the plugin's headers, the workflow will automatically
-build the plugin and tag it with a new version. The built tag will contain all
-the required front-end assets the plugin may require. This works well for
-publishing to WordPress.org or for submodule-ing.
-
-When you are ready to release a new version of the plugin, you can run
-`npm run release` to start the process of setting up a new release.
+New versions of this plugin will be created as releases in GitHub once ready.
 
 ## Changelog
 
