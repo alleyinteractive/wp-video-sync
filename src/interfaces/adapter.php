@@ -8,6 +8,7 @@
 namespace Alley\WP\WP_Video_Sync\Interfaces;
 
 use DateTimeImmutable;
+use stdClass;
 
 /**
  * Defines an interface that all adapters must implement.
@@ -18,7 +19,7 @@ interface Adapter {
 	 *
 	 * @param DateTimeImmutable $updated_after Return videos modified after this date.
 	 *
-	 * @return array An array of video data. Specific shape will be determined by the adapter.
+	 * @return stdClass[] An array of video data. Specific shape will be determined by the adapter.
 	 */
 	public function get_videos( DateTimeImmutable $updated_after ): array;
 }
