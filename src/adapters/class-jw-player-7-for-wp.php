@@ -23,7 +23,7 @@ class JW_Player_7_For_WP implements Adapter {
 	 * @return stdClass[] An array of video data.
 	 */
 	public function get_videos( DateTimeImmutable $updated_after ): array {
-		// Check if the JW Player 7 for WP Premium plugin is active.
+		// Check if the JW Player 7 for WP plugin is active (free or premium).
 		if ( class_exists( 'JWPPP_Dashboard_Api' ) ) {
 			$api    = new \JWPPP_Dashboard_Api();
 			$result = $api->call(
@@ -34,8 +34,6 @@ class JW_Player_7_For_WP implements Adapter {
 			);
 			return $result->media ?? [];
 		}
-
-		// TODO: Check if the free version of the plugin is active.
 
 		return [];
 	}

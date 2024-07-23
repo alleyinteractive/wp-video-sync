@@ -1,6 +1,6 @@
 <?php
 /**
- * WP Video Sync Mocks: JW Player 7 for WP Premium
+ * WP Video Sync Mocks: JW Player 7 for WP (free and premium)
  *
  * phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound,WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
  *
@@ -8,7 +8,7 @@
  */
 
 /**
- * A mock for the JW Player 7 for WP Premium dashboard API class.
+ * A mock for the JW Player 7 for WP (free and premium) dashboard API class.
  */
 class JWPPP_Dashboard_Api {
 	/**

@@ -18,9 +18,9 @@ use WP_Query;
  */
 class JWPlayerAdapterTest extends TestCase {
 	/**
-	 * Tests the behavior of the adapter with the JW Player 7 for WP Premium plugin.
+	 * Tests the behavior of the adapter with the JW Player 7 for WP plugin (free and premium).
 	 */
-	public function test_jw_player_7_for_wp_premium() {
+	public function test_jw_player_7_for_wp() {
 		// Fake the class that's used to make the API call.
 		require_once __DIR__ . '/../Mocks/JWPPP_Dashboard_API.php';
 
