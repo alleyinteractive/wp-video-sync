@@ -28,9 +28,9 @@ class Sync_Manager {
 	/**
 	 * The adapter to use for fetching videos.
 	 *
-	 * @var Adapter
+	 * @var ?Adapter
 	 */
-	public Adapter $adapter;
+	public ?Adapter $adapter;
 
 	/**
 	 * A callback to run for each result when the sync runs.
@@ -75,6 +75,11 @@ class Sync_Manager {
 	 * @throws Error If unable to parse the last sync as a DateTimeImmutable object.
 	 */
 	public function sync_videos(): void {
+		// If there isn't a valid adapter, bail.
+		if ( ! $this->adapter instanceof Adapter ) {
+			throw new Error( esc_html__( 'WP Video Sync: Unable to sync videos without a valid adapter.', 'wp-video-sync' ) );
+		}
+
 		// If there isn't a valid callback, bail.
 		if ( ! is_callable( $this->callback ) ) {
 			throw new Error( esc_html__( 'WP Video Sync: Unable to execute provided callback.', 'wp-video-sync' ) );

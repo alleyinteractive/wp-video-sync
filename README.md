@@ -6,7 +6,7 @@ Tags: alleyinteractive, wp-video-sync
 
 Stable tag: 0.1.0
 
-Requires at least: 6.6
+Requires at least: 6.0
 
 Tested up to: 6.6
 

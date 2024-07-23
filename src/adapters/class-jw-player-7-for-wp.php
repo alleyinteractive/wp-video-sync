@@ -18,9 +18,9 @@ class JW_Player_7_For_WP implements Adapter {
 	/**
 	 * The date of the last modification to the last batch of videos.
 	 *
-	 * @var DateTimeImmutable
+	 * @var ?DateTimeImmutable
 	 */
-	private DateTimeImmutable $last_modified_date;
+	private ?DateTimeImmutable $last_modified_date;
 
 	/**
 	 * Fetches the date of the last modification to the last batch of videos.
