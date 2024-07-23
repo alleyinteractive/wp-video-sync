@@ -37,32 +37,57 @@ Activate the plugin in WordPress and use it like so:
 ```php
 use Alley\WP\WP_Video_Sync\Adapters\JW_Player_7_For_WP;
 use Alley\WP\WP_Video_Sync\Sync_Manager;
+use DateInterval;
 use DateTimeImmutable;
 use WP_Query;
 
-$sync_manager = Sync_Manager::init()
-	->with_adapter( new JW_Player_7_For_WP() )
-	->with_frequency( 'hourly' )
-	->with_callback(
-		function ( $video ) {
-			$existing_video = new WP_Query( [ 'meta_key' => 'jwplayer_id', 'meta_value' => $video->id ] );
-			$existing_id    = $existing_video->posts[0]->ID ?? 0;
-			wp_insert_post(
-				[
-					'ID'            => $existing_id,
-					'post_title'    => $video->metadata->title,
-					'post_date'     => DateTimeImmutable::createFromFormat( DATE_W3C, $video->created )->format( 'Y-m-d H:i:s' ),
-					'post_modified' => DateTimeImmutable::createFromFormat( DATE_W3C, $video->last_modified )->format( 'Y-m-d H:i:s' ),
-					'meta_input'    => [
-						'jwplayer_id' => $video->id,
-					],
-				]
-			);
-		}
-	);
+add_action( 'plugins_loaded', function () => {
+	$sync_manager = Sync_Manager::init()
+		->with_adapter( new JW_Player_7_For_WP() )
+		->with_frequency( 'hourly' )
+		->with_batch_size( 1000 )
+		->with_callback(
+			function ( $video ) {
+				$existing_video = new WP_Query( [ 'meta_key' => '_jwppp-video-url-1', 'meta_value' => $video->id ] );
+				$existing_id    = $existing_video->posts[0]->ID ?? 0;
+				$duration       = '';
+				try {
+					if ( ! empty( $video->metadata->duration ) ) {
+						$duration = ( new DateTimeImmutable() )
+							->add( new DateInterval( sprintf( 'PT%dS', (int) $video->metadata->duration ) ) )
+							->diff( new DateTimeImmutable() )->format( 'H:i:s' );
+					}
+				} catch ( Exception $e ) {
+					$duration = '';
+				}
+				wp_insert_post(
+					[
+						'ID'            => $existing_id,
+						'post_type'     => 'post',
+						'post_status'   => 'publish',
+						'post_title'    => $video->metadata->title,
+						'post_content'  => $video->metadata->description ?? '',
+						'post_date'     => DateTimeImmutable::createFromFormat( DATE_W3C, $video->created )->format( 'Y-m-d H:i:s' ),
+						'post_modified' => DateTimeImmutable::createFromFormat( DATE_W3C, $video->last_modified )->format( 'Y-m-d H:i:s' ),
+						'meta_input'    => [
+							'_jwppp-video-url-1'           => $video->id,
+							'_jwppp-cloud-playlist-1'      => 'no',
+							'_jwppp-sources-number-1'      => 1,
+							'_jwppp-video-title-1'         => $video->metadata->title,
+							'_jwppp-video-description-1'   => $video->metadata->description ?? '',
+							'_jwppp-activate-media-type-1' => 0,
+							'_jwppp-playlist-carousel-1'   => 0,
+							'_jwppp-video-duration-1'      => $duration,
+							'_jwppp-video-tags-1'          => $video->metadata->tags ?? '',
+						],
+					]
+				);
+			}
+		);
+} );
 ```
 
-This will configure the plugin to import a batch of 100 videos every hour from JW Player, sorted by least to most recently updated, starting with the date and time of the last video that was updated. If videos have already been imported (as identified by the postmeta value saved for the unique video ID) they will be updated rather than created. New videos will be created. The example code above uses the `post` post type for this purpose, but the code could easily be adapted to use a custom post type. Additionally, the post content could be set to include a Gutenberg block or a shortcode for a player.
+This will configure the plugin to import a batch of 1000 videos every hour from JW Player, sorted by least to most recently updated, starting with the date and time of the last video that was updated. If videos have already been imported (as identified by the postmeta value saved for the unique video ID) they will be updated rather than created. New videos will be created. The example code above uses the `post` post type for this purpose, but the code could easily be adapted to use a custom post type. Additionally, the post content could be set to include a Gutenberg block or a shortcode for a player.
 
 ### Supported Adapters
 
