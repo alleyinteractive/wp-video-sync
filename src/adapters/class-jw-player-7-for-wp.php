@@ -16,6 +16,22 @@ use stdClass;
  */
 class JW_Player_7_For_WP implements Adapter {
 	/**
+	 * The date of the last modification to the last batch of videos.
+	 *
+	 * @var DateTimeImmutable
+	 */
+	private DateTimeImmutable $last_modified_date;
+
+	/**
+	 * Fetches the date of the last modification to the last batch of videos.
+	 *
+	 * @return ?DateTimeImmutable
+	 */
+	public function get_last_modified_date(): ?DateTimeImmutable {
+		return $this->last_modified_date;
+	}
+
+	/**
 	 * Fetches videos from JW Player that were modified after the provided DateTime.
 	 *
 	 * @param DateTimeImmutable $updated_after Return videos modified after this date.
@@ -32,7 +48,17 @@ class JW_Player_7_For_WP implements Adapter {
 					$updated_after->format( 'Y-m-d' )
 				)
 			);
-			return $result->media ?? [];
+			$videos = $result->media ?? [];
+
+			// Attempt to set the last modified date.
+			if ( isset( $videos[ count( $videos ) - 1 ]->last_modified ) ) {
+				$last_modified_date = DateTimeImmutable::createFromFormat( DATE_W3C, $videos[ count( $videos ) - 1 ]->last_modified );
+				if ( $last_modified_date instanceof DateTimeImmutable ) {
+					$this->last_modified_date = $last_modified_date;
+				}
+			}
+
+			return $videos;
 		}
 
 		return [];

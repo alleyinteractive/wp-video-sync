@@ -15,6 +15,13 @@ use stdClass;
  */
 interface Adapter {
 	/**
+	 * Fetches the date of the last modification to the last batch of videos.
+	 *
+	 * @return ?DateTimeImmutable
+	 */
+	public function get_last_modified_date(): ?DateTimeImmutable;
+
+	/**
 	 * Fetches videos from the provider that were modified after the provided DateTime.
 	 *
 	 * @param DateTimeImmutable $updated_after Return videos modified after this date.
