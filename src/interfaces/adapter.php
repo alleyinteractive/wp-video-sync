@@ -25,8 +25,9 @@ interface Adapter {
 	 * Fetches videos from the provider that were modified after the provided DateTime.
 	 *
 	 * @param DateTimeImmutable $updated_after Return videos modified after this date.
+	 * @param int               $batch_size    The number of videos to fetch in each batch.
 	 *
 	 * @return stdClass[] An array of video data. Specific shape will be determined by the adapter.
 	 */
-	public function get_videos( DateTimeImmutable $updated_after ): array;
+	public function get_videos( DateTimeImmutable $updated_after, int $batch_size ): array;
 }

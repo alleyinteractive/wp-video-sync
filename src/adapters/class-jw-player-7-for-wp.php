@@ -35,17 +35,19 @@ class JW_Player_7_For_WP implements Adapter {
 	 * Fetches videos from JW Player that were modified after the provided DateTime.
 	 *
 	 * @param DateTimeImmutable $updated_after Return videos modified after this date.
+	 * @param int               $batch_size    The number of videos to fetch in each batch.
 	 *
 	 * @return stdClass[] An array of video data.
 	 */
-	public function get_videos( DateTimeImmutable $updated_after ): array {
+	public function get_videos( DateTimeImmutable $updated_after, int $batch_size ): array {
 		// Check if the JW Player 7 for WP plugin is active (free or premium).
 		if ( class_exists( 'JWPPP_Dashboard_Api' ) ) {
 			$api    = new \JWPPP_Dashboard_Api();
 			$result = $api->call(
 				sprintf(
-					'media/?q=last_modified:[%s TO *]&page=1&page_length=100&sort=last_modified:asc',
-					$updated_after->format( 'Y-m-d' )
+					'media/?q=last_modified:[%s TO *]&page=1&page_length=%d&sort=last_modified:asc',
+					$updated_after->format( 'Y-m-d' ),
+					$batch_size
 				)
 			);
 			$videos = $result->media ?? [];

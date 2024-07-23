@@ -33,6 +33,13 @@ class Sync_Manager {
 	public ?Adapter $adapter;
 
 	/**
+	 * The number of videos to process in each batch.
+	 *
+	 * @var int
+	 */
+	public int $batch_size = 1000;
+
+	/**
 	 * A callback to run for each result when the sync runs.
 	 *
 	 * @var callable
@@ -100,7 +107,7 @@ class Sync_Manager {
 		}
 
 		// Get a batch of videos and loop over them and process each.
-		$videos = $this->adapter->get_videos( $last_sync );
+		$videos = $this->adapter->get_videos( $last_sync, $this->batch_size );
 		foreach ( $videos as $video ) {
 			call_user_func_array( $this->callback, [ $video ] );
 		}
@@ -108,7 +115,7 @@ class Sync_Manager {
 		// Try to update the last sync time to the last modified time of the last video that was processed.
 		$next_last_modified = $this->adapter->get_last_modified_date();
 		if ( $next_last_modified instanceof DateTimeImmutable ) {
-			update_option( self::LAST_SYNC_OPTION, $next_last_modified->format( DATE_W3C ) );
+			update_option( self::LAST_SYNC_OPTION, $next_last_modified->format( DATE_W3C ), false );
 		}
 	}
 
@@ -121,6 +128,18 @@ class Sync_Manager {
 	 */
 	public function with_adapter( Adapter $adapter ): self {
 		$this->adapter = $adapter;
+		return $this;
+	}
+
+	/**
+	 * Allows the batch size to be configured.
+	 *
+	 * @param int $batch_size The number of videos to process in each batch.
+	 *
+	 * @return $this For chaining configuration.
+	 */
+	public function with_batch_size( int $batch_size ): self {
+		$this->batch_size = $batch_size;
 		return $this;
 	}
 
