@@ -75,6 +75,8 @@ class Sync_Manager {
 	 * @throws Error If unable to parse the last sync as a DateTimeImmutable object.
 	 */
 	public function sync_videos(): void {
+		define( 'WP_IMPORTING', true ); // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
+
 		// If there isn't a valid adapter, bail.
 		if ( ! $this->adapter instanceof Adapter ) {
 			throw new Error( esc_html__( 'WP Video Sync: Unable to sync videos without a valid adapter.', 'wp-video-sync' ) );
