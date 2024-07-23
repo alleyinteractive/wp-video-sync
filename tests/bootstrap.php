@@ -7,6 +7,8 @@
  * @package wp-video-sync
  */
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 /**
  * Visit {@see https://mantle.alley.com/testing/test-framework.html} to learn more.
  */

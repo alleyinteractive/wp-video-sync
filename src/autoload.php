@@ -12,7 +12,7 @@ namespace Alley\WP\WP_Video_Sync;
  *
  * @param string $class Class name.
  */
-function autoload( string $class ) {
+function autoload( string $class ): void {
 	// Only autoload classes for this namespace.
 	$class = ltrim( $class, '\\' );
 	if ( strpos( $class, __NAMESPACE__ . '\\' ) !== 0 ) {

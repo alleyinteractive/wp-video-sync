@@ -8,7 +8,8 @@
 namespace Alley\WP\WP_Video_Sync;
 
 use Alley\WP\WP_Video_Sync\Interfaces\Adapter;
-use DateTime;
+use DateTimeImmutable;
+use Error;
 
 /**
  * Sync manager. Manages the synchronization of videos from a provider.
@@ -39,33 +40,17 @@ class Sync_Manager {
 	public string $frequency = 'hourly';
 
 	/**
-	 * Constructor. Sets up actions and filters.
+	 * Factory method that creates a new instance of this class, hooks it, and returns it.
+	 *
+	 * @return self
 	 */
-	public function __construct() {
-		add_action( 'admin_init', [ $this, 'maybe_schedule_sync' ] );
-		add_action( self::CRON_HOOK, [ $this, 'sync_videos' ] );
-	}
+	public static function init(): self {
+		$instance = new self();
 
-	/**
-	 * Allows the sync frequency to be set. Can be any valid value for wp_schedule_event().
-	 *
-	 * @param string $frequency The frequency with which to sync videos.
-	 *
-	 * @return $this For chaining configuration.
-	 */
-	public function with_frequency( string $frequency ): self {
-		$this->frequency = $frequency;
-		return $this;
-	}
+		add_action( 'admin_init', [ $instance, 'maybe_schedule_sync' ] );
+		add_action( self::CRON_HOOK, [ $instance, 'sync_videos' ] );
 
-	/**
-	 * Loads the JW Player 7 for WP adapter.
-	 *
-	 * @return $this For chaining configuration.
-	 */
-	public function with_jw_player_7_for_wp(): self {
-		$this->adapter = new Adapters\JW_Player_7_For_WP();
-		return $this;
+		return $instance;
 	}
 
 	/**
@@ -79,12 +64,50 @@ class Sync_Manager {
 
 	/**
 	 * Syncs videos from the provider.
+	 *
+	 * @throws Error If unable to parse the last sync as a DateTimeImmutable object.
 	 */
 	public function sync_videos(): void {
-		$last_sync = get_option( self::LAST_SYNC_OPTION, DateTime::createFromFormat( DATE_W3C, '1970-01-01T00:00:00Z' ) );
-		$videos    = $this->adapter->get_videos( $last_sync );
+		// Try to get the option value so we can parse it as a date. If it doesn't exist, default to the Unix epoch.
+		$option_value = get_option( self::LAST_SYNC_OPTION, '1970-01-01T00:00:00Z' );
+		if ( ! is_string( $option_value ) ) {
+			throw new Error( esc_html__( 'The value saved to the options table for the last sync time is not a string.', 'wp-video-sync' ) );
+		}
+
+		// Try to parse the last sync time into a DateTimeImmutable object and fail if we can't.
+		$last_sync = DateTimeImmutable::createFromFormat( DATE_W3C, $option_value );
+		if ( ! $last_sync instanceof DateTimeImmutable ) {
+			throw new Error( esc_html__( 'The last sync time could not be parsed into a DateTimeImmutable object.', 'wp-video-sync' ) );
+		}
+
+		// Get a batch of videos and loop over them and process each.
+		$videos = $this->adapter->get_videos( $last_sync );
 		foreach ( $videos as $video ) {
 			// Do something with the video.
 		}
+	}
+
+	/**
+	 * Allows the adapter to be set. Can be used with an adapter that ships with this plugin or any custom adapter that implements the Adapter interface.
+	 *
+	 * @param Adapter $adapter The adapter to load.
+	 *
+	 * @return $this For chaining configuration.
+	 */
+	public function with_adapter( Adapter $adapter ): self {
+		$this->adapter = $adapter;
+		return $this;
+	}
+
+	/**
+	 * Allows the sync frequency to be set. Can be any valid value for wp_schedule_event().
+	 *
+	 * @param string $frequency The frequency with which to sync videos.
+	 *
+	 * @return $this For chaining configuration.
+	 */
+	public function with_frequency( string $frequency ): self {
+		$this->frequency = $frequency;
+		return $this;
 	}
 }
