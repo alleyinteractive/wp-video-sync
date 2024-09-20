@@ -21,4 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// Define the plugin version.
+define( 'WP_VIDEO_SYNC_VERSION', '1.7.2' );
+
 require_once __DIR__ . '/src/autoload.php';
