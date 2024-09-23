@@ -22,7 +22,7 @@ class JW_Player implements Adapter {
 	 *
 	 * @var ?DateTimeImmutable
 	 */
-	private ?DateTimeImmutable $last_modified_date;
+	private ?DateTimeImmutable $last_modified_date = null;
 
 	/**
 	 * The JW Player API.
