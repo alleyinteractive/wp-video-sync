@@ -7,7 +7,12 @@
 
 namespace Alley\WP\WP_Video_Sync\API;
 
-class JW_Player_API {
+use Alley\WP\WP_Video_Sync\Interfaces\API_Requester;
+
+/**
+ * JW Player API.
+ */
+class JW_Player_API implements API_Requester {
 
 	/**
 	 * The API URL.
@@ -31,6 +36,13 @@ class JW_Player_API {
 	public string $api_secret;
 
 	/**
+	 * The request URL.
+	 *
+	 * @var string
+	 */
+	public string $request_url;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct( string $api_key, string $api_secret ) {
@@ -39,28 +51,15 @@ class JW_Player_API {
 	}
 
 	/**
-	 * Set the user agent in the request headers for identification purposes.
-	 *
-	 * @return string
-	 */
-	public function user_agent(): string {
-		global $wp_version;
-
-		return 'WordPress/' . $wp_version . ' WPVideoSync/' . WP_VIDEO_SYNC_VERSION . ' PHP/' . phpversion();
-	}
-
-	/**
 	 * Generate the request URL.
 	 *
 	 * @param string $last_modified_date The date of the last modification to the last batch of videos.
 	 * @param int    $batch_size         The number of videos to fetch in each batch.
-	 *
-	 * @return string
 	 */
-	public function request_url( string $last_modified_date, int $batch_size ): string {
+	public function set_request_url( string $last_modified_date, int $batch_size ) {
 		$request_url = $this->api_url . '/' . $this->api_key . '/media/';
 
-		return add_query_arg(
+		$this->request_url = add_query_arg(
 			[
 				'q'           => 'last_modified:[' . $last_modified_date . ' TO *]',
 				'page'        => 1,
@@ -72,15 +71,21 @@ class JW_Player_API {
 	}
 
 	/**
-	 * Generate the request arguments.
+	 * Get the request URL.
 	 *
-	 * @param string $type The type of request to make.
+	 * @return string
+	 */
+	public function get_request_url(): string {
+		return $this->request_url;
+	}
+
+	/**
+	 * Get the request arguments.
 	 *
 	 * @return array
 	 */
-	public function request_args( string $type = '' ): array {
+	public function get_request_args(): array {
 		return [
-			'user-agent' => $this->user_agent(),
 			'headers'    => [
 				'Authorization' => 'Bearer ' . $this->api_secret,
 				'Content-Type'  => 'application/json',
@@ -89,74 +94,28 @@ class JW_Player_API {
 	}
 
 	/**
-	 * Parse the API response.
+	 * Parse the API error response.
 	 *
-	 * @param mixed $api_response The API response.
+	 * @param mixed $response_object The API response object.
 	 *
 	 * @return array
 	 */
-	public function parse_response( mixed $api_response ): array {
-		// Failed request expressed as a WP_Error.
-		if ( is_wp_error( $api_response ) ) {
-			return [];
-		}
-
-		// Condition for when the response body is empty.
-		$response_body = wp_remote_retrieve_body( $api_response );
-
-		if ( empty( $response_body ) ) {
-			return [];
-		}
-
-		// Assign the response object for further evaluation.
-		$response_object = json_decode( $response_body );
-
-		if ( 200 !== wp_remote_retrieve_response_code( $api_response ) ) {
-			return isset( $response_object->errors[0]->description )
-				? [ 'error' => $response_object->errors[0]->description ]
-				: [];
-		}
-
-		return is_array( $response_object->media ) && ! empty( $response_object->media )
-			? $response_object->media
+	public function parse_error( array $response_object ): array {
+		return isset( $response_object['errors'][0]->description )
+			? [ 'error' => $response_object['errors'][0]->description ]
 			: [];
 	}
 
 	/**
-	 * Make the API request.
+	 * Parse the API successful response.
 	 *
-	 * @param string $updated_after The date of the last modification to the last batch of videos.
-	 * @param int    $batch_size    The number of videos to fetch in each batch.
+	 * @param mixed $response_object The API response object.
 	 *
 	 * @return array
 	 */
-	public function request_latest_videos( string $updated_after, int $batch_size ): array {
-		$request_url = $this->request_url(
-			$updated_after,
-			$batch_size
-		);
-
-		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-			$api_request = vip_safe_wp_remote_get(
-				$request_url,
-				'',
-				3,
-				5,
-				3,
-				$this->request_args()
-			);
-		} else {
-			$api_request = wp_remote_get(
-				$request_url,
-				wp_parse_args(
-					$this->request_args(),
-					[
-						'timeout' => 3,
-					]
-				)
-			);
-		}
-
-		return $this->parse_response( $api_request );
+	public function parse_success( array $response_object ): array {
+		return is_array( $response_object['media'] ) && ! empty( $response_object['media'] )
+			? [ 'media' => $response_object['media'] ]
+			: [];
 	}
 }

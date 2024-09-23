@@ -8,6 +8,7 @@
 namespace Alley\WP\WP_Video_Sync\Adapters;
 
 use Alley\WP\WP_Video_Sync\API\JW_Player_API;
+use Alley\WP\WP_Video_Sync\API\Request;
 use Alley\WP\WP_Video_Sync\Interfaces\Adapter;
 use DateTimeImmutable;
 use stdClass;
@@ -77,11 +78,14 @@ class JW_Player implements Adapter {
 	 * @return stdClass[] An array of video data.
 	 */
 	public function get_videos( DateTimeImmutable $updated_after, int $batch_size ): array {
-		// Get the latest videos from JW Player.
-		$videos = $this->jw_player_api->request_latest_videos(
+		// Set the request URL based on the arguments.
+		$this->jw_player_api->set_request_url(
 			$updated_after->format( 'Y-m-d' ),
 			$batch_size
 		);
+
+		// Perform the request.
+		$videos = ( new Request( $this->jw_player_api ) )->get();
 
 		// Check for an API error.
 		if ( ! empty( $videos['error'] ) ) {
@@ -89,9 +93,9 @@ class JW_Player implements Adapter {
 		}
 
 		// Attempt to set the last modified date.
-		$this->set_last_modified_date( $videos );
+		$this->set_last_modified_date( $videos['media'] );
 
 		// Return the videos.
-		return ! empty( $videos ) ? $videos : [];
+		return ! empty( $videos['media'] ) ? $videos['media'] : [];
 	}
 }
