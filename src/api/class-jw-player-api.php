@@ -79,17 +79,13 @@ class JW_Player_API {
 	 * @return array
 	 */
 	public function request_args( string $type = '' ): array {
-		$default_args = [
+		return [
 			'user-agent' => $this->user_agent(),
 			'headers'    => [
 				'Authorization' => 'Bearer ' . $this->api_secret,
 				'Content-Type'  => 'application/json',
 			],
 		];
-
-		return 'vip' === $type
-			? $default_args
-			: array_merge( $default_args, [ 'timeout' => 3 ] );
 	}
 
 	/**
@@ -147,12 +143,17 @@ class JW_Player_API {
 				3,
 				5,
 				3,
-				$this->request_args( 'vip' )
+				$this->request_args()
 			);
 		} else {
 			$api_request = wp_remote_get(
 				$request_url,
-				$this->request_args()
+				wp_parse_args(
+					$this->request_args(),
+					[
+						'timeout' => 3,
+					]
+				)
 			);
 		}
 
