@@ -32,21 +32,12 @@ class JW_Player implements Adapter {
 	public JW_Player_API $jw_player_api;
 
 	/**
-	 * The start date if the `last_modified_date` does not exist.
-	 *
-	 * @var string
-	 */
-	public string $origin_modified_date;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param JW_Player_API $api Instance of the JW Player API object.
-	 * @param string        $origin_modified_date The date of the used if the `last_modified_date` does not exist.
 	 */
-	public function __construct( JW_Player_API $api, string $origin_modified_date = '' ) {
-		$this->jw_player_api        = $api;
-		$this->origin_modified_date = ! empty( $origin_modified_date ) ? $origin_modified_date : date( 'Y-m-d' );
+	public function __construct( JW_Player_API $api ) {
+		$this->jw_player_api = $api;
 	}
 
 	/**
@@ -55,7 +46,7 @@ class JW_Player implements Adapter {
 	 * @return ?DateTimeImmutable
 	 */
 	public function get_last_modified_date(): ?DateTimeImmutable {
-		return $this->last_modified_date ?? DateTimeImmutable::createFromFormat('Y-m-d', $this->origin_modified_date );
+		return $this->last_modified_date;
 	}
 
 	/**
