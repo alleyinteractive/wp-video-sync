@@ -14,12 +14,6 @@ use stdClass;
  * Defines an interface that all adapters must implement.
  */
 interface Adapter {
-	/**
-	 * Fetches the date of the last modification to the last batch of videos.
-	 *
-	 * @return ?DateTimeImmutable
-	 */
-	public function get_last_modified_date(): ?DateTimeImmutable;
 
 	/**
 	 * Fetches videos from the provider that were modified after the provided DateTime.

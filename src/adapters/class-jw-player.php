@@ -10,20 +10,14 @@ namespace Alley\WP\WP_Video_Sync\Adapters;
 use Alley\WP\WP_Video_Sync\API\JW_Player_API;
 use Alley\WP\WP_Video_Sync\API\Request;
 use Alley\WP\WP_Video_Sync\Interfaces\Adapter;
+use Alley\WP\WP_Video_Sync\Last_Modified_Date;
 use DateTimeImmutable;
 use stdClass;
 
 /**
  * JW Player Adapter.
  */
-class JW_Player implements Adapter {
-
-	/**
-	 * The date of the last modification to the last batch of videos.
-	 *
-	 * @var ?DateTimeImmutable
-	 */
-	private ?DateTimeImmutable $last_modified_date = null;
+class JW_Player extends Last_Modified_Date implements Adapter {
 
 	/**
 	 * The JW Player API.
@@ -39,34 +33,6 @@ class JW_Player implements Adapter {
 	 */
 	public function __construct( JW_Player_API $api ) {
 		$this->jw_player_api = $api;
-	}
-
-	/**
-	 * Fetches the date of the last modification to the last batch of videos.
-	 *
-	 * @return ?DateTimeImmutable
-	 */
-	public function get_last_modified_date(): ?DateTimeImmutable {
-		return $this->last_modified_date;
-	}
-
-	/**
-	 * Sets the date of the last modification to the latest batch of videos.
-	 *
-	 * @param array $videos An array of videos and associated data.
-	 * @return void
-	 */
-	public function set_last_modified_date( array $videos ): void {
-		if (
-			! empty( $videos )
-			&& isset( $videos[ count( $videos ) - 1 ]->last_modified )
-		) {
-			$last_modified_date = DateTimeImmutable::createFromFormat( DATE_W3C, $videos[ count( $videos ) - 1 ]->last_modified );
-
-			if ( $last_modified_date instanceof DateTimeImmutable ) {
-				$this->last_modified_date = $last_modified_date;
-			}
-		}
 	}
 
 	/**
@@ -93,7 +59,12 @@ class JW_Player implements Adapter {
 		}
 
 		// Attempt to set the last modified date.
-		$this->set_last_modified_date( $videos['media'] );
+		if (
+			! empty( $videos['media'] )
+			&& isset( $videos['media'][ count( $videos['media'] ) - 1 ]->last_modified )
+		) {
+			$this->set_last_modified_date( $videos['media'][ count( $videos ) - 1 ]->last_modified );
+		}
 
 		// Return the videos.
 		return ! empty( $videos['media'] ) ? $videos['media'] : [];
