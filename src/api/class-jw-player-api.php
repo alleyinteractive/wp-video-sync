@@ -44,6 +44,9 @@ class JW_Player_API implements API_Requester {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param string $api_key The API key.
+	 * @param string $api_secret The API secret.
 	 */
 	public function __construct( string $api_key, string $api_secret ) {
 		$this->api_key    = $api_key;
@@ -86,7 +89,7 @@ class JW_Player_API implements API_Requester {
 	 */
 	public function get_request_args(): array {
 		return [
-			'headers'    => [
+			'headers' => [
 				'Authorization' => 'Bearer ' . $this->api_secret,
 				'Content-Type'  => 'application/json',
 			],
@@ -96,7 +99,7 @@ class JW_Player_API implements API_Requester {
 	/**
 	 * Parse the API error response.
 	 *
-	 * @param mixed $response_object The API response object.
+	 * @param array $response_object The API response object.
 	 *
 	 * @return array
 	 */
@@ -109,7 +112,7 @@ class JW_Player_API implements API_Requester {
 	/**
 	 * Parse the API successful response.
 	 *
-	 * @param mixed $response_object The API response object.
+	 * @param array $response_object The API response object.
 	 *
 	 * @return array
 	 */

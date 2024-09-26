@@ -9,6 +9,9 @@ namespace Alley\WP\WP_Video_Sync\API;
 
 use Alley\WP\WP_Video_Sync\Interfaces\API_Requester;
 
+/**
+ * Perform an API request.
+ */
 class Request {
 
 	/**
@@ -25,8 +28,6 @@ class Request {
 	 */
 	public function __construct( API_Requester $api_requester ) {
 		$this->api_requester = $api_requester;
-
-		return $this;
 	}
 
 	/**
@@ -58,7 +59,7 @@ class Request {
 	/**
 	 * Parse the API response.
 	 *
-	 * @param mixed $response
+	 * @param mixed $response The API response.
 	 * @return array
 	 */
 	private function parse_response( mixed $response ): array {
@@ -99,7 +100,7 @@ class Request {
 				$this->get_request_args()
 			);
 		} else {
-			$api_request = wp_remote_get(
+			$api_request = wp_remote_get( // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 				$this->api_requester->get_request_url(),
 				$this->get_request_args()
 			);
