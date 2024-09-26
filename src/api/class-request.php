@@ -44,7 +44,7 @@ class Request {
 	/**
 	 * Get the request arguments.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_request_args(): array {
 		$requester_args = $this->api_requester->get_request_args();
@@ -53,6 +53,11 @@ class Request {
 			$requester_args['user-agent'] = $this->user_agent();
 		}
 
+		/**
+		 * Allow the request arguments to be filtered before the request is made.
+		 *
+		 * @param array<string, string|float|int|bool|array> $requester_args The request arguments.
+		 */
 		return apply_filters( 'wp_video_sync_request_args', $requester_args );
 	}
 
@@ -60,11 +65,12 @@ class Request {
 	 * Parse the API response.
 	 *
 	 * @param mixed $response The API response.
-	 * @return array
+	 *
+	 * @return array<string, mixed>
 	 */
 	private function parse_response( mixed $response ): array {
 		// Failed request expressed as a WP_Error.
-		if ( is_wp_error( $response ) || empty( $response ) ) {
+		if ( is_wp_error( $response ) || empty( $response ) || ! is_array( $response ) ) {
 			return [];
 		}
 
@@ -87,7 +93,7 @@ class Request {
 	/**
 	 * Perform a GET request.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get(): array {
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {

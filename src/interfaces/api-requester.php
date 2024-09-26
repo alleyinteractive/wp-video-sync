@@ -23,23 +23,26 @@ interface API_Requester {
 	/**
 	 * Get the arguments for the API request.
 	 *
-	 * @return array
+	 * @return array<string, array<string, string>>
 	 */
 	public function get_request_args(): array;
 
 	/**
+	 * Parse an error API response.
+	 *
+	 * @param array<mixed> $response_object The API response object.
+	 *
+	 * @return array<string, string>
+	 */
+	public function parse_error( array $response_object ): array;
+
+	/**
 	 * Parse a successful API response.
 	 *
-	 * @param array $response_object The response object.
-	 * @return array
+	 * @param array<mixed> $response_object The API response object.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function parse_success( array $response_object ): array;
 
-	/**
-	 * Parse an error API response.
-	 *
-	 * @param array $response_object The response object.
-	 * @return array
-	 */
-	public function parse_error( array $response_object ): array;
 }

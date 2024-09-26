@@ -59,7 +59,7 @@ class JW_Player_API implements API_Requester {
 	 * @param string $last_modified_date The date of the last modification to the last batch of videos.
 	 * @param int    $batch_size         The number of videos to fetch in each batch.
 	 */
-	public function set_request_url( string $last_modified_date, int $batch_size ) {
+	public function set_request_url( string $last_modified_date, int $batch_size ): void {
 		$request_url = $this->api_url . '/' . $this->api_key . '/media/';
 
 		$this->request_url = add_query_arg(
@@ -85,7 +85,7 @@ class JW_Player_API implements API_Requester {
 	/**
 	 * Get the request arguments.
 	 *
-	 * @return array
+	 * @return array<string, array<string, string>>
 	 */
 	public function get_request_args(): array {
 		return [
@@ -99,12 +99,14 @@ class JW_Player_API implements API_Requester {
 	/**
 	 * Parse the API error response.
 	 *
-	 * @param array $response_object The API response object.
+	 * @param array<mixed> $response_object The API response object.
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public function parse_error( array $response_object ): array {
-		return isset( $response_object['errors'][0]->description )
+		return ! empty( $response_object['errors'] )
+			&& is_array($response_object['errors'] )
+			&& isset( $response_object['errors'][0]->description )
 			? [ 'error' => $response_object['errors'][0]->description ]
 			: [];
 	}
@@ -112,12 +114,13 @@ class JW_Player_API implements API_Requester {
 	/**
 	 * Parse the API successful response.
 	 *
-	 * @param array $response_object The API response object.
+	 * @param array<mixed> $response_object The API response object.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function parse_success( array $response_object ): array {
-		return is_array( $response_object['media'] ) && ! empty( $response_object['media'] )
+		return ! empty( $response_object['media'] )
+			&& is_array( $response_object['media'] )
 			? [ 'media' => $response_object['media'] ]
 			: [];
 	}

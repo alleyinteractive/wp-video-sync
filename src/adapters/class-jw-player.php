@@ -12,7 +12,6 @@ use Alley\WP\WP_Video_Sync\API\Request;
 use Alley\WP\WP_Video_Sync\Interfaces\Adapter;
 use Alley\WP\WP_Video_Sync\Last_Modified_Date;
 use DateTimeImmutable;
-use stdClass;
 
 /**
  * JW Player Adapter.
@@ -41,7 +40,7 @@ class JW_Player extends Last_Modified_Date implements Adapter {
 	 * @param DateTimeImmutable $updated_after Return videos modified after this date.
 	 * @param int               $batch_size    The number of videos to fetch in each batch.
 	 *
-	 * @return stdClass[] An array of video data.
+	 * @return array<mixed> An array of video data objects.
 	 */
 	public function get_videos( DateTimeImmutable $updated_after, int $batch_size ): array {
 		// Set the request URL based on the arguments.
@@ -58,9 +57,14 @@ class JW_Player extends Last_Modified_Date implements Adapter {
 			return [];
 		}
 
+		// Validate the media property.
+		if ( ! is_array( $videos['media'] ) ) {
+			return [];
+		}
+
 		// Attempt to set the last modified date.
 		if (
-			! empty( $videos['media'] )
+			! empty( $videos['media'][ count( $videos['media'] ) - 1 ] )
 			&& isset( $videos['media'][ count( $videos['media'] ) - 1 ]->last_modified )
 		) {
 			$this->set_last_modified_date( $videos['media'][ count( $videos ) - 1 ]->last_modified );
