@@ -113,9 +113,11 @@ class Sync_Manager {
 		}
 
 		// Try to update the last sync time to the last modified time of the last video that was processed.
-		$next_last_modified = $this->adapter->get_last_modified_date();
-		if ( $next_last_modified instanceof DateTimeImmutable ) {
-			update_option( self::LAST_SYNC_OPTION, $next_last_modified->format( DATE_W3C ), false );
+		if ( method_exists( $this->adapter, 'get_last_modified_date' ) ) {
+			$next_last_modified = $this->adapter->get_last_modified_date();
+			if ( $next_last_modified instanceof DateTimeImmutable ) {
+				update_option( self::LAST_SYNC_OPTION, $next_last_modified->format( DATE_W3C ), false );
+			}
 		}
 	}
 
