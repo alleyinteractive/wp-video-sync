@@ -105,7 +105,7 @@ class JW_Player_API implements API_Requester {
 	 */
 	public function parse_error( array $response_object ): array {
 		return ! empty( $response_object['errors'] )
-			&& is_array($response_object['errors'] )
+			&& is_array( $response_object['errors'] )
 			&& isset( $response_object['errors'][0]->description )
 			? [ 'error' => $response_object['errors'][0]->description ]
 			: [];

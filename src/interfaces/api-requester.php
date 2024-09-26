@@ -44,5 +44,4 @@ interface API_Requester {
 	 * @return array<string, mixed>
 	 */
 	public function parse_success( array $response_object ): array;
-
 }
