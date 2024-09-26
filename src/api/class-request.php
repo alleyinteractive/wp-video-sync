@@ -106,9 +106,43 @@ class Request {
 				$this->get_request_args()
 			);
 		} else {
+			// Get the base request arguments.
+			$custom_args = $this->get_request_args();
+
+			// Explicitly define the request arguments.
+			// NOTE: this is addressing an error stemming from PHPStan where the passed arguments to the `wp_remote_get()` were not accepted.
+			$request_args = [];
+
+			// Request method.
+			if ( ! empty( $custom_args['method'] ) && is_string( $custom_args['method'] ) ) {
+				$request_args['method'] = $custom_args['method'];
+			}
+
+			// Request headers.
+			if (
+				! empty( $custom_args['headers'] )
+				&& (
+					is_string( $custom_args['headers'] )
+					|| is_array( $custom_args['headers'] )
+				)
+			) {
+				$request_args['headers'] = $custom_args['headers'];
+			}
+
+			// Request timeout.
+			if ( ! empty( $custom_args['timeout'] ) && is_float( $custom_args['timeout'] ) ) {
+				$request_args['timeout'] = $custom_args['timeout'];
+			}
+
+			// Request user agent.
+			if ( ! empty( $custom_args['user-agent'] ) && is_string( $custom_args['user-agent'] ) ) {
+				$request_args['user-agent'] = $custom_args['user-agent'];
+			}
+
+			// Perform the request.
 			$api_request = wp_remote_get( // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 				$this->api_requester->get_request_url(),
-				$this->get_request_args()
+				array_filter( $request_args )
 			);
 		}
 
