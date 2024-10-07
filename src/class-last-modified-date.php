@@ -33,14 +33,10 @@ class Last_Modified_Date {
 	/**
 	 * Sets the date of the last modification based on the latest batch of videos.
 	 *
-	 * @param string $last_modified_date The date of the last modified video in the batch.
+	 * @param DateTimeImmutable $last_modified_date The date of the last modified video in the batch.
 	 * @return void
 	 */
-	public function set_last_modified_date( string $last_modified_date = '' ): void {
-		$last_modified_date = DateTimeImmutable::createFromFormat( DATE_W3C, $last_modified_date );
-
-		if ( $last_modified_date instanceof \DateTimeImmutable ) {
-			$this->last_modified_date = $last_modified_date;
-		}
+	public function set_last_modified_date( DateTimeImmutable $last_modified_date ): void {
+		$this->last_modified_date = $last_modified_date;
 	}
 }
