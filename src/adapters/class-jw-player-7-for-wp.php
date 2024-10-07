@@ -40,7 +40,10 @@ class JW_Player_7_For_WP extends Last_Modified_Date implements Adapter {
 
 			// Attempt to set the last modified date.
 			if ( isset( $videos[ count( $videos ) - 1 ]->last_modified ) ) {
-				$this->set_last_modified_date( $videos[ count( $videos ) - 1 ]->last_modified );
+				$last_modified_date = DateTimeImmutable::createFromFormat( DATE_W3C, $videos[ count( $videos ) - 1 ]->last_modified );
+				if ( $last_modified_date instanceof DateTimeImmutable ) {
+					$this->set_last_modified_date( $last_modified_date );
+				}
 			}
 
 			return $videos;

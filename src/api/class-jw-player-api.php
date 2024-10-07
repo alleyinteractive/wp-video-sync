@@ -8,11 +8,13 @@
 namespace Alley\WP\WP_Video_Sync\API;
 
 use Alley\WP\WP_Video_Sync\Interfaces\API_Requester;
+use Alley\WP\WP_Video_Sync\Last_Modified_Date;
+use DateTimeImmutable;
 
 /**
  * JW Player API.
  */
-class JW_Player_API implements API_Requester {
+class JW_Player_API extends Last_Modified_Date implements API_Requester {
 
 	/**
 	 * The API URL.
@@ -80,6 +82,25 @@ class JW_Player_API implements API_Requester {
 				'Content-Type'  => 'application/json',
 			],
 		];
+	}
+
+	/**
+	 * Fetches videos from JW Player that were modified after the provided DateTime.
+	 *
+	 * @param DateTimeImmutable $updated_after Return videos modified after this date.
+	 * @param int               $batch_size    The number of videos to fetch in each batch.
+	 *
+	 * @return array<mixed> An array of video data objects.
+	 */
+	public function get_videos_after( DateTimeImmutable $updated_after, int $batch_size ): array {
+		// Set the request URL based on the arguments.
+		$this->set_request_url(
+			$updated_after->format( 'Y-m-d' ),
+			$batch_size
+		);
+
+		// Perform the request.
+		return ( new Request( $this ) )->get();
 	}
 
 	/**

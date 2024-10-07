@@ -8,7 +8,6 @@
 namespace Alley\WP\WP_Video_Sync\Adapters;
 
 use Alley\WP\WP_Video_Sync\API\JW_Player_API;
-use Alley\WP\WP_Video_Sync\API\Request;
 use Alley\WP\WP_Video_Sync\Interfaces\Adapter;
 use Alley\WP\WP_Video_Sync\Last_Modified_Date;
 use DateTimeImmutable;
@@ -21,9 +20,13 @@ class JW_Player extends Last_Modified_Date implements Adapter {
 	/**
 	 * Constructor.
 	 *
-	 * @param JW_Player_API $jw_player_api Instance of the JW Player API object.
+	 * @param string $api_key The API key.
+	 * @param string $api_secret The API v2 secret key.
 	 */
-	public function __construct( public readonly JW_Player_API $jw_player_api ) {}
+	public function __construct(
+		public readonly string $api_key,
+		public readonly string $api_secret
+	) {}
 
 	/**
 	 * Fetches videos from JW Player that were modified after the provided DateTime.
@@ -34,14 +37,15 @@ class JW_Player extends Last_Modified_Date implements Adapter {
 	 * @return array<mixed> An array of video data objects.
 	 */
 	public function get_videos( DateTimeImmutable $updated_after, int $batch_size ): array {
-		// Set the request URL based on the arguments.
-		$this->jw_player_api->set_request_url(
-			$updated_after->format( 'Y-m-d' ),
+		$videos = (
+			new JW_Player_API(
+				$this->api_key,
+				$this->api_secret
+			)
+		)->get_videos_after(
+			$updated_after,
 			$batch_size
 		);
-
-		// Perform the request.
-		$videos = ( new Request( $this->jw_player_api ) )->get();
 
 		// Check for an API error.
 		if ( ! empty( $videos['error'] ) ) {
@@ -58,7 +62,10 @@ class JW_Player extends Last_Modified_Date implements Adapter {
 			! empty( $videos['media'][ count( $videos['media'] ) - 1 ] )
 			&& isset( $videos['media'][ count( $videos['media'] ) - 1 ]->last_modified )
 		) {
-			$this->set_last_modified_date( $videos['media'][ count( $videos ) - 1 ]->last_modified );
+			$last_modified_date = DateTimeImmutable::createFromFormat( DATE_W3C, $videos['media'][ count( $videos['media'] ) - 1 ]->last_modified );
+			if ( $last_modified_date instanceof DateTimeImmutable ) {
+				$this->set_last_modified_date( $last_modified_date );
+			}
 		}
 
 		// Return the videos.
