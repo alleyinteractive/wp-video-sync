@@ -32,7 +32,8 @@ class JWPlayerAdapterTest extends TestCase {
 		$sync_manager = Sync_Manager::init()
 			->with_adapter(
 				new JW_Player(
-					new JW_Player_API( 'api_key', 'api_secret' )
+					'api_key',
+					'api_secret'
 				)
 			)
 			->with_callback( fn ( $video ) => self::factory()->post->create(
