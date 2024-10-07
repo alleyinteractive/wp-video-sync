@@ -15,20 +15,11 @@ use Alley\WP\WP_Video_Sync\Interfaces\API_Requester;
 class Request {
 
 	/**
-	 * The API requester.
-	 *
-	 * @var API_Requester
-	 */
-	public API_Requester $api_requester;
-
-	/**
 	 * Constructor.
 	 *
-	 * @param API_Requester $api_requester The API requester.
+	 * @param API_Requester $api_requester Instance of the API requester.
 	 */
-	public function __construct( API_Requester $api_requester ) {
-		$this->api_requester = $api_requester;
-	}
+	public function __construct( public readonly API_Requester $api_requester ) {}
 
 	/**
 	 * Set the user agent in the request headers for identification purposes.

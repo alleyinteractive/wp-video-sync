@@ -19,20 +19,11 @@ use DateTimeImmutable;
 class JW_Player extends Last_Modified_Date implements Adapter {
 
 	/**
-	 * The JW Player API.
-	 *
-	 * @var JW_Player_API
-	 */
-	public JW_Player_API $jw_player_api;
-
-	/**
 	 * Constructor.
 	 *
-	 * @param JW_Player_API $api Instance of the JW Player API object.
+	 * @param JW_Player_API $jw_player_api Instance of the JW Player API object.
 	 */
-	public function __construct( JW_Player_API $api ) {
-		$this->jw_player_api = $api;
-	}
+	public function __construct( public readonly JW_Player_API $jw_player_api ) {}
 
 	/**
 	 * Fetches videos from JW Player that were modified after the provided DateTime.

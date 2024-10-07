@@ -22,20 +22,6 @@ class JW_Player_API implements API_Requester {
 	public string $api_url = 'https://api.jwplayer.com/v2/sites';
 
 	/**
-	 * The API public key.
-	 *
-	 * @var string
-	 */
-	public string $api_key;
-
-	/**
-	 * The API v2 secret key.
-	 *
-	 * @var string
-	 */
-	public string $api_secret;
-
-	/**
 	 * The request URL.
 	 *
 	 * @var string
@@ -46,12 +32,12 @@ class JW_Player_API implements API_Requester {
 	 * Constructor.
 	 *
 	 * @param string $api_key The API key.
-	 * @param string $api_secret The API secret.
+	 * @param string $api_secret The API v2 secret key.
 	 */
-	public function __construct( string $api_key, string $api_secret ) {
-		$this->api_key    = $api_key;
-		$this->api_secret = $api_secret;
-	}
+	public function __construct(
+		public readonly string $api_key,
+		public readonly string $api_secret
+	) {}
 
 	/**
 	 * Generate the request URL.
