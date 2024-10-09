@@ -8,10 +8,8 @@ Example Integration:
 \Alley\WP\WP_Video_Sync\Sync_Manager::init()
 	->with_adapter(
 		new \Alley\WP\WP_Video_Sync\Adapters\JW_Player(
-			new \Alley\WP\WP_Video_Sync\API\JW_Player_API(
-				[PROPERTY_ID],
-				[API_KEY]
-			)
+			[PROPERTY_ID],
+			[API_KEY]
 		)
 	)
 	->with_batch_size()
