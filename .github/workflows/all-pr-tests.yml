@@ -25,5 +25,5 @@ jobs:
         uses: alleyinteractive/action-test-php@develop
         with:
           php-version: ${{ matrix.php-version }}
-          wordpress-host: 'false'
-          wordpress-version: 'false'
+          wordpress-version: 'latest'
+          skip-wordpress-install: 'true'

@@ -41,7 +41,7 @@ use DateInterval;
 use DateTimeImmutable;
 use WP_Query;
 
-add_action( 'plugins_loaded', function () => {
+add_action( 'plugins_loaded', function () {
 	$sync_manager = Sync_Manager::init()
 		->with_adapter( new JW_Player_7_For_WP() )
 		->with_frequency( 'hourly' )

@@ -1,41 +1,37 @@
 <?php
 /**
- * WP Video Sync Tests: JW Player Adapter Test
+ * WP Video Sync Tests: JW Player 7 for WP Adapter Test.
  *
  * @package wp-video-sync
  */
 
 namespace Alley\WP\WP_Video_Sync\Tests\Feature;
 
-use Alley\WP\WP_Video_Sync\API\JW_Player_API;
-use Alley\WP\WP_Video_Sync\Adapters\JW_Player;
+use Alley\WP\WP_Video_Sync\Adapters\JW_Player_7_For_WP;
 use Alley\WP\WP_Video_Sync\Sync_Manager;
 use Alley\WP\WP_Video_Sync\Tests\TestCase;
 use DateTimeImmutable;
 use WP_Query;
 
 /**
- * A test suite for the JW Player adapter.
+ * A test suite for the JW Player 7 for WP adapter.
  */
-class JWPlayerAdapterTest extends TestCase {
-
+class JWPlayer7ForWPAdapterTest extends TestCase {
 	/**
-	 * Tests the behavior of the adapter with the JW Player.
+	 * Tests the behavior of the adapter with the JW Player 7 for WP plugin (free and premium).
 	 */
-	public function test_jw_player() {
+	public function test_jw_player_7_for_wp() {
+		// Fake the class that's used to make the API call.
+		require_once __DIR__ . '/../Mocks/JWPPP_Dashboard_API.php';
+
 		// Fake the API response for the first page of data.
-		$this->fake_request( 'https://api.jwplayer.com/v2/sites/api_key/media*' )
+		$this->fake_request( 'https://api.jwplayer.com/v2/sites/example-api-key/media/*' )
 			->with_response_code( 200 )
-			->with_file( __DIR__ . '/../Fixtures/jw-player-api-v2-media.json' );
+			->with_body( file_get_contents( __DIR__ . '/../Fixtures/jw-player-api-v2-media.json' ) );
 
 		// Create an instance of the adapter.
 		$sync_manager = Sync_Manager::init()
-			->with_adapter(
-				new JW_Player(
-					'api_key',
-					'api_secret'
-				)
-			)
+			->with_adapter( new JW_Player_7_For_WP() )
 			->with_callback( fn ( $video ) => self::factory()->post->create(
 				[
 					'post_title'    => $video->metadata->title,
@@ -58,7 +54,6 @@ class JWPlayerAdapterTest extends TestCase {
 				'post_type'   => 'post',
 			]
 		);
-
 		$this->assertEquals( 1, $video_query->post_count );
 		$this->assertEquals( 'Example Video', $video_query->posts[0]->post_title );
 		$this->assertEquals( '2024-01-01 12:00:00', $video_query->posts[0]->post_date );

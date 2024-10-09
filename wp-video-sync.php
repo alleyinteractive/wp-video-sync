@@ -3,7 +3,7 @@
  * Plugin Name: WP Video Sync
  * Plugin URI: https://github.com/alleyinteractive/wp-video-sync
  * Description: Sync videos from a hosting provider to WordPress
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: Alley
  * Author URI: https://github.com/alleyinteractive/wp-video-sync
  * Requires at least: 6.0
@@ -20,5 +20,8 @@ namespace Alley\WP\WP_Video_Sync;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// Define the plugin version.
+define( 'WP_VIDEO_SYNC_VERSION', '0.2.0' );
 
 require_once __DIR__ . '/src/autoload.php';
